@@ -39,7 +39,7 @@ bool fuzztest() {
       items.insert(j);
       frontier.push_back(j);
     }
-    PQTree tree(items);
+    PQTree<int> tree(items);
 
     // We pick a random ordering of the items.
     random_shuffle(frontier.begin(), frontier.end());

@@ -18,12 +18,13 @@
 #include "pqnode.h"
 #include "pqtree.h"
 
-string ReadableType(PQNode::PQNode_types type) {
-  if (type == PQNode::leaf) {
+template <typename T>
+string ReadableType(typename PQNode<T>::PQNode_types type) {
+  if (type == PQNode<T>::leaf) {
     return "leaf";
-  } else if (type == PQNode::pnode) {
+  } else if (type == PQNode<T>::pnode) {
     return "P-Node";
-  } else if (type == PQNode::qnode) {
+  } else if (type == PQNode<T>::qnode) {
     return "Q-Node";
   }
   return "unknown";
@@ -33,7 +34,7 @@ void testbed() {
   set<int> S;
   for(int i=1;i<9;i++)
     S.insert(i);
-  PQTree P(S);
+  PQTree<int> P(S);
 
   cout << "PQ Tree with 8 elements and no reductions" << endl;  
   cout << P.Print() << endl;
@@ -91,24 +92,24 @@ void testbed() {
 
   // Lets actually explore the tree manually
   cout << endl;
-  PQNode* root = P.Root();
-  cout << "Root Type: " << ReadableType(root->Type()) << endl;
-  vector<PQNode*> children;
+  PQNode<int>* root = P.Root();
+  cout << "Root Type: " << ReadableType<int>(root->Type()) << endl;
+  vector<PQNode<int>*> children;
   root->Children(&children);
   for (int i = 0; i < children.size(); ++i) {
-    PQNode* child = children[i];
-    cout << "Child " << i+1 << " Type: " << ReadableType(child->Type());
-    if (child->Type() == PQNode::leaf) {
+    PQNode<int>* child = children[i];
+    cout << "Child " << i+1 << " Type: " << ReadableType<int>(child->Type());
+    if (child->Type() == PQNode<int>::leaf) {
       cout << " Value: " << child->LeafValue() << endl;
     } else {
       cout << endl;
-      vector<PQNode*> grandchildren;
+      vector<PQNode<int>*> grandchildren;
       child->Children(&grandchildren);
       for (int j = 0; j < grandchildren.size(); ++j) {
-	PQNode* grandchild = grandchildren[j];
+	PQNode<int>* grandchild = grandchildren[j];
         cout << "GrandChild " << j+1 << " Type: " 
-	     << ReadableType(grandchild->Type());
-        if (grandchild->Type() == PQNode::leaf)
+	     << ReadableType<int>(grandchild->Type());
+        if (grandchild->Type() == PQNode<int>::leaf)
 	  cout << " Value: " << grandchild->LeafValue();
 	cout << endl;
       }
