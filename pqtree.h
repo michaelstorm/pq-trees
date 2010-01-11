@@ -60,7 +60,7 @@ class PQTree {
   // increases the time complexity of the algorithm.  To fix, you can create an
   // array of items so that each item hashes to its leaf address in constant
   // time, but this is a tradeoff to conserve space.
-  map<int, PQNode<T>*> leaf_address_;
+  map<T, PQNode<T>*> leaf_address_;
 
   // A reference to a pseudonode that cannot be reached through the root
   // of the tree.  The pseudonode is a temporary node designed to handle

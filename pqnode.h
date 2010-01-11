@@ -193,10 +193,10 @@ class PQNode {
   void LabelAsFull();
 
   // Walks the tree to build a map from values to leaf pointers.
-  void FindLeaves(map<int, PQNode<T>*> &leafAddress);
+  void FindLeaves(map<T, PQNode<T>*> &leafAddress);
   
   // Walks the tree to find it's Frontier, returns one possible ordering.
-  void FindFrontier(list<int> &ordering);
+  void FindFrontier(list<T> &ordering);
   
   // Resets a bunch of temporary variables after the reduce walks
   void Reset();
@@ -607,7 +607,7 @@ void PQNode<T>::ReplaceCircularLink(PQNode<T>* old_child, PQNode<T>* new_child) 
 // at the leaves.  
 // TODO: Could probably be implemented better using function pointers.
 template <typename T>
-void PQNode<T>::FindLeaves(map<int, PQNode<T>*> &leafAddress) {
+void PQNode<T>::FindLeaves(map<T, PQNode<T>*> &leafAddress) {
   if (type_ == leaf) {
     leafAddress[leaf_value_] = this;
   } else if (type_ == pnode) {
@@ -629,7 +629,7 @@ void PQNode<T>::FindLeaves(map<int, PQNode<T>*> &leafAddress) {
 }
   
 template <typename T>
-void PQNode<T>::FindFrontier(list<int> &ordering) {
+void PQNode<T>::FindFrontier(list<T> &ordering) {
   if (type_ == leaf) {
     ordering.push_back(leaf_value_);
   } else if (type_ == pnode) {
