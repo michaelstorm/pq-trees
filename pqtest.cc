@@ -45,6 +45,7 @@ void testbed() {
   S.insert(3);
   cout << P.Reduce(S) << endl;
   cout << P.Print() << endl;
+  cout << "Permutations: " << P.PermutationCount() << endl;
   
   cout << "Reducing by set {4, 3, 6}" << endl;
   S.clear();
@@ -53,6 +54,7 @@ void testbed() {
   S.insert(3);
   cout << P.Reduce(S) << endl;
   cout << P.Print() << endl;
+  cout << "Permutations: " << P.PermutationCount() << endl;
   
   cout << "Reducing by set {4, 3, 5}" << endl;
   S.clear();
@@ -61,6 +63,7 @@ void testbed() {
   S.insert(5);
   cout << P.Reduce(S) << endl;
   cout << P.Print() << endl;
+  cout << "Permutations: " << P.PermutationCount() << endl;
     
   cout << "Reducing by set {4, 5}" << endl;
   S.clear();
@@ -68,6 +71,7 @@ void testbed() {
   S.insert(5);
   cout << P.Reduce(S) << endl;
   cout << P.Print() << endl;
+  cout << "Permutations: " << P.PermutationCount() << endl;
   
   cout << "Reducing by set {2, 6}" << endl;
   S.clear();
@@ -75,6 +79,7 @@ void testbed() {
   S.insert(6);
   cout << P.Reduce(S) << endl;
   cout << P.Print() << endl;
+  cout << "Permutations: " << P.PermutationCount() << endl;
   
   cout << "Reducing by set {1, 2}" << endl;
   S.clear();
@@ -82,6 +87,7 @@ void testbed() {
   S.insert(2);
   cout << P.Reduce(S) << endl;
   cout << P.Print() << endl;
+  cout << "Permutations: " << P.PermutationCount() << endl;
   
   cout << "Reducing by set {4, 5}" << endl;
   S.clear();
@@ -89,6 +95,7 @@ void testbed() {
   S.insert(5);
   cout << P.Reduce(S) << endl;
   cout << P.Print() << endl;
+  cout << "Permutations: " << P.PermutationCount() << endl;
 
   // Lets actually explore the tree manually
   cout << endl;

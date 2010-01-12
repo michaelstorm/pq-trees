@@ -149,6 +149,9 @@ class PQTree {
   
   // Returns the set of all elements on which a reduction was performed.
   set<T> GetContained();
+  
+  // Returns the number of valid ways in which the elements can be rearranged.
+  int PermutationCount();
 };
 
 template <typename T>
@@ -966,6 +969,11 @@ set<T> PQTree<T>::GetContained() {
     out = SetMethods::SetUnion(out,*i);
   }
   return out;
+}
+
+template <typename T>
+int PQTree<T>::PermutationCount() {
+  return root_->PermutationCount();
 }
 
 // Default destructor, Needs to delete the root.

@@ -52,6 +52,8 @@ class PQNode {
   // Returns all of this Node's children if it has any.
   // Return Value is the |children| argument.
   void Children(vector<PQNode<T>*> *children);
+  
+  int PermutationCount();
 
  private:
   /***** Used by P Nodes only *****/
@@ -261,6 +263,31 @@ template <typename T>
 T PQNode<T>::LeafValue() {
   assert(type_ == leaf);
   return leaf_value_;
+}
+
+template <typename T>
+int PQNode<T>::PermutationCount() {
+  int count = 1;
+  if (type_ != leaf) {
+    for (typename list<PQNode<T>*>::const_iterator j = circular_link_.begin();
+         j != circular_link_.end(); ++j)
+      count *= (*j)->PermutationCount();
+  }
+  
+  if (type_ == pnode) {
+    for (int i = circular_link_.size(); i > 0; i--)
+      count *= i;
+  } else if (type_ == qnode) {
+    int q_children = 0;
+    for(QNodeChildrenIterator<T> qit(this); !qit.IsDone(); qit.Next()) {
+      q_children++;
+      if (q_children > 1) {
+        count *= 2;
+        break;
+      }
+    }
+  }
+  return count;
 }
 
 template <typename T>
@@ -647,7 +674,7 @@ void PQNode<T>::FindFrontier(list<T> &ordering) {
     }
   }
 }
-    
+
 // Resets a bunch of temporary variables after the reduce walks
 template <typename T>
 void PQNode<T>::Reset() {
