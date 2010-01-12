@@ -30,12 +30,14 @@ using namespace std;
 
 template <typename T> class PQTree;
 template <typename T> class QNodeChildrenIterator;
+template <typename T> class QNodeChildrenConstIterator;
 
 template <typename T>
 class PQNode {
  // PQNodes are not exposed by pqtrees, they are internally used only.
  friend class PQTree<T>;
   friend class QNodeChildrenIterator<T>;
+  friend class QNodeChildrenConstIterator<T>;
 
  public:
   // Enum types we use throughout.
@@ -44,16 +46,16 @@ class PQNode {
   enum PQNode_labels {empty, full, partial};
 
   // Returns the type of the current node, an enum of type PQNode_types.
-  PQNode_types Type();
+  PQNode_types Type() const;
 
   // Returns the value of the leaf node.  Fails assertion if not leaf node.
-  T LeafValue();
+  T LeafValue() const;
 
   // Returns all of this Node's children if it has any.
   // Return Value is the |children| argument.
-  void Children(vector<PQNode<T>*> *children);
+  void Children(vector<PQNode<T>*> *children) const;
   
-  int PermutationCount();
+  int PermutationCount() const;
 
  private:
   /***** Used by P Nodes only *****/
@@ -63,10 +65,10 @@ class PQNode {
   list<PQNode<T>*> circular_link_;
   
   // A count of the number of children used by a node.
-  int ChildCount();
+  int ChildCount() const;
 
   // Returns the first |circular_link_| child with a given label or NULL.
-  PQNode<T>* CircularChildWithLabel(PQNode_labels label);
+  PQNode<T>* CircularChildWithLabel(PQNode_labels label) const;
 
   // Moves the full children of this node to children of |new_node|.
   void MoveFullChildren(PQNode<T>* new_node);
@@ -84,13 +86,13 @@ class PQNode {
   bool pseudonode_, pseudochild_;
 
   // Returns the first endmost child with a given label or NULL.
-  PQNode<T>* EndmostChildWithLabel(PQNode_labels label);
+  PQNode<T>* EndmostChildWithLabel(PQNode_labels label) const;
   
   // Returns the first immediate sibling with a given label or NULL.
-  PQNode<T>* ImmediateSiblingWithLabel(PQNode_labels label);
+  PQNode<T>* ImmediateSiblingWithLabel(PQNode_labels label) const;
 
   // Returns the first immediate sibling without a given label or NULL.
-  PQNode<T>* ImmediateSiblingWithoutLabel(PQNode_labels label);
+  PQNode<T>* ImmediateSiblingWithoutLabel(PQNode_labels label) const;
 
   // Adds an immediate sibling to this node.
   void AddImmediateSibling(PQNode<T>* sibling);
@@ -102,7 +104,7 @@ class PQNode {
   void ClearImmediateSiblings();
 
   // Returns the number of immediate siblings this node has (0, 1, or 2).
-  int ImmediateSiblingCount();
+  int ImmediateSiblingCount() const;
 
   // Replaces the |endmost_children_| pointer to |old_child| with |new_child|.
   void ReplaceEndmostChild(PQNode<T>* old_child, PQNode<T>* new_child);
@@ -119,7 +121,7 @@ class PQNode {
 
   // Returns true if all of the full and partial children of this node are
   // consecutive, with the partial children on the outside.
-  bool ConsecutiveFullPartialChildren();
+  bool ConsecutiveFullPartialChildren() const;
   
   /***** Used by Both Node types *****/
   
@@ -158,10 +160,10 @@ class PQNode {
   int pertinent_leaf_count;
 
   // The value of the PQNode<T> if it is a leaf.
-  int leaf_value_;
+  T leaf_value_;
 
   // Makes a deep copy of a node, sets this to be it's parent and returns copy.
-  PQNode<T>* CopyAsChild(const PQNode<T>& to_copy);
+  PQNode<T>* CopyAsChild(const PQNode<T>& to_copy) const;
 
   // Makes a deep copy of copy.
   void Copy(const PQNode<T>& copy);
@@ -172,7 +174,7 @@ class PQNode {
   // Return the next child in the immediate_siblings chain given a last pointer
   // if last pointer is null, will return the first sibling.  Behavior similar
   // to an iterator.
-  PQNode<T>* QNextChild(PQNode<T> *last);
+  PQNode<T>* QNextChild(PQNode<T> *last) const;
 
   void ReplaceChild(PQNode<T>* old_child, PQNode<T>* new_child);
   
@@ -183,7 +185,7 @@ class PQNode {
   PQNode<T>(const PQNode<T>& to_copy);
     
   // Constructor for a leaf PQNode<T>.
-  PQNode<T>(T value);
+  PQNode<T>(const T& value);
   
   // Constructor for non-leaf PQNode<T>.
   PQNode<T>();
@@ -195,10 +197,10 @@ class PQNode {
   void LabelAsFull();
 
   // Walks the tree to build a map from values to leaf pointers.
-  void FindLeaves(map<T, PQNode<T>*> &leafAddress);
+  void FindLeaves(map<T, PQNode<T>*> &leafAddress) const;
   
   // Walks the tree to find it's Frontier, returns one possible ordering.
-  void FindFrontier(list<T> &ordering);
+  void FindFrontier(list<T> &ordering) const;
   
   // Resets a bunch of temporary variables after the reduce walks
   void Reset();
@@ -206,7 +208,7 @@ class PQNode {
   // Walks the tree and prints it's structure to |out|.  P-nodes are
   // represented as ( ), Q-nodes as [ ], and leafs by their integer id. Used
   // primarily for debugging purposes
-  void Print(string *out);
+  void Print(string *out) const;
 };
 
 // Q-Nodes have an unusual structure that makes iterating over their children
@@ -255,18 +257,50 @@ class QNodeChildrenIterator {
 };
 
 template <typename T>
-typename PQNode<T>::PQNode_types PQNode<T>::Type() {
+class QNodeChildrenConstIterator {
+ public:
+  // Creates an iterator of the children of |parent| optionally forcing the
+  // iteration to start on the |begin_side|.
+  QNodeChildrenConstIterator(const PQNode<T>* parent, const PQNode<T>* begin_side=NULL);
+
+  // Returns a pointer to the current PQNode<T> child in the list.
+  const PQNode<T>* Current();
+
+  // Next advances the current position in the child list.  If |IsDone()|,
+  // operation has no effect.
+  void Next();
+
+  // Resets the iterator to the beginning of the list of children, optionally
+  // forcing the iteration to start on the |begin_side|.
+  void Reset(const PQNode<T>* begin_side=NULL);
+
+  // Indicate whether or not all children have been looped through.  The initial
+  // list order (forward or reverse) is consistent during the life of the
+  // object.
+  bool IsDone();
+
+ private:
+  // Next() helper method to deal with pseudonodes.
+  void NextPseudoNodeSibling();
+  const PQNode<T>* parent_;
+  const PQNode<T>* current_;
+  const PQNode<T>* next_;
+  const PQNode<T>* prev_;
+};
+
+template <typename T>
+typename PQNode<T>::PQNode_types PQNode<T>::Type() const {
   return type_;
 }
 
 template <typename T>
-T PQNode<T>::LeafValue() {
+T PQNode<T>::LeafValue() const {
   assert(type_ == leaf);
   return leaf_value_;
 }
 
 template <typename T>
-int PQNode<T>::PermutationCount() {
+int PQNode<T>::PermutationCount() const {
   int count = 1;
   if (type_ != leaf) {
     for (typename list<PQNode<T>*>::const_iterator j = circular_link_.begin();
@@ -279,7 +313,7 @@ int PQNode<T>::PermutationCount() {
       count *= i;
   } else if (type_ == qnode) {
     int q_children = 0;
-    for(QNodeChildrenIterator<T> qit(this); !qit.IsDone(); qit.Next()) {
+    for(QNodeChildrenConstIterator<T> qit(this); !qit.IsDone(); qit.Next()) {
       q_children++;
       if (q_children > 1) {
         count *= 2;
@@ -291,25 +325,25 @@ int PQNode<T>::PermutationCount() {
 }
 
 template <typename T>
-void PQNode<T>::Children(vector<PQNode<T>*> *children) {
+void PQNode<T>::Children(vector<PQNode<T>*> *children) const {
   assert(children->empty());
   if (type_ == pnode) {
     for (typename list<PQNode<T>*>::const_iterator i = circular_link_.begin();
 	 i != circular_link_.end(); ++i)
       children->push_back(*i);
   } else if (type_ == qnode) {
-    for(QNodeChildrenIterator<T> qit(this); !qit.IsDone(); qit.Next())
-      children->push_back(qit.Current());
+    for(QNodeChildrenConstIterator<T> qit(this); !qit.IsDone(); qit.Next())
+      children->push_back((PQNode<T>*)qit.Current());
   }
 } 
 
 template <typename T>
-int PQNode<T>::ChildCount() {
+int PQNode<T>::ChildCount() const {
   return circular_link_.size();
 }
 
 template <typename T>
-PQNode<T>* PQNode<T>::CopyAsChild(const PQNode<T>& to_copy) {
+PQNode<T>* PQNode<T>::CopyAsChild(const PQNode<T>& to_copy) const {
   PQNode<T>* temp = new PQNode<T>(to_copy);
   temp->parent_ = this;
   return temp;
@@ -393,7 +427,7 @@ void PQNode<T>::LabelAsFull() {
 // Return the next child in the immediate_siblings_ chain given a last pointer.
 // If last pointer is null, will return the first sibling.
 template <typename T>
-PQNode<T>* PQNode<T>::QNextChild(PQNode<T> *last) {
+PQNode<T>* PQNode<T>::QNextChild(PQNode<T> *last) const {
   if (immediate_siblings_[0] == last) {
       return immediate_siblings_[1];
   } else {
@@ -437,7 +471,7 @@ void PQNode<T>::SwapQ(PQNode<T> *toInsert) {
 }
   
 template <typename T>
-PQNode<T>::PQNode(T value) {
+PQNode<T>::PQNode(const T& value) {
   leaf_value_             = value;
   type_                  = leaf;
   parent_                = NULL;
@@ -482,8 +516,8 @@ PQNode<T>::~PQNode<T>() {
 }
 
 template <typename T>
-PQNode<T>* PQNode<T>::CircularChildWithLabel(PQNode_labels label) {
-  for (typename list<PQNode<T>*>::iterator i = circular_link_.begin();
+PQNode<T>* PQNode<T>::CircularChildWithLabel(PQNode_labels label) const {
+  for (typename list<PQNode<T>*>::const_iterator i = circular_link_.begin();
        i != circular_link_.end(); i++) {
     if ((*i)->label_ == label)
       return *i;
@@ -493,7 +527,7 @@ PQNode<T>* PQNode<T>::CircularChildWithLabel(PQNode_labels label) {
 
 
 template <typename T>
-PQNode<T>* PQNode<T>::EndmostChildWithLabel(PQNode_labels label) {
+PQNode<T>* PQNode<T>::EndmostChildWithLabel(PQNode_labels label) const {
   for (int i = 0; i < 2; ++i)
     if (endmost_children_[i] && endmost_children_[i]->label_ == label)
       return endmost_children_[i];
@@ -501,7 +535,7 @@ PQNode<T>* PQNode<T>::EndmostChildWithLabel(PQNode_labels label) {
 }
 
 template <typename T>
-PQNode<T>* PQNode<T>::ImmediateSiblingWithLabel(PQNode_labels label) {
+PQNode<T>* PQNode<T>::ImmediateSiblingWithLabel(PQNode_labels label) const {
   for (int i = 0; i < 2 && immediate_siblings_[i]; ++i)
     if (immediate_siblings_[i]->label_ == label)
       return immediate_siblings_[i];
@@ -509,7 +543,7 @@ PQNode<T>* PQNode<T>::ImmediateSiblingWithLabel(PQNode_labels label) {
 }
 
 template <typename T>
-PQNode<T>* PQNode<T>::ImmediateSiblingWithoutLabel(PQNode_labels label) {
+PQNode<T>* PQNode<T>::ImmediateSiblingWithoutLabel(PQNode_labels label) const {
   for (int i = 0; i < 2 && immediate_siblings_[i]; ++i)
     if (immediate_siblings_[i]->label_ != label)
       return immediate_siblings_[i];
@@ -542,7 +576,7 @@ void PQNode<T>::ClearImmediateSiblings() {
 }
 
 template <typename T>
-int PQNode<T>::ImmediateSiblingCount() {
+int PQNode<T>::ImmediateSiblingCount() const {
   int count = 0;
   for (int i = 0; i < 2 && immediate_siblings_[i]; ++i)
     count ++;
@@ -587,7 +621,7 @@ void PQNode<T>::ForgetChildren() {
 }  
 
 template <typename T>
-bool PQNode<T>::ConsecutiveFullPartialChildren() {
+bool PQNode<T>::ConsecutiveFullPartialChildren() const {
   // Trivial Case:
   if (full_children_.size() + partial_children_.size() <= 1)
     return true;
@@ -634,7 +668,7 @@ void PQNode<T>::ReplaceCircularLink(PQNode<T>* old_child, PQNode<T>* new_child) 
 // at the leaves.  
 // TODO: Could probably be implemented better using function pointers.
 template <typename T>
-void PQNode<T>::FindLeaves(map<T, PQNode<T>*> &leafAddress) {
+void PQNode<T>::FindLeaves(map<T, PQNode<T>*> &leafAddress) const {
   if (type_ == leaf) {
     leafAddress[leaf_value_] = this;
   } else if (type_ == pnode) {
@@ -656,7 +690,7 @@ void PQNode<T>::FindLeaves(map<T, PQNode<T>*> &leafAddress) {
 }
   
 template <typename T>
-void PQNode<T>::FindFrontier(list<T> &ordering) {
+void PQNode<T>::FindFrontier(list<T> &ordering) const {
   if (type_ == leaf) {
     ordering.push_back(leaf_value_);
   } else if (type_ == pnode) {
@@ -706,14 +740,14 @@ void PQNode<T>::Reset() {
 // Walks the tree from the top and prints the tree structure to the string out.
 // Used primarily for debugging purposes.
 template <typename T>
-void PQNode<T>::Print(string *out) {
+void PQNode<T>::Print(string *out) const {
   if (type_ == leaf) {
     char value_str[10];
     sprintf(value_str, "%d", leaf_value_);
     *out += value_str;
   } else if (type_ == pnode) {
     *out += "(";
-    for (typename list<PQNode<T>*>::iterator i = circular_link_.begin();
+    for (typename list<PQNode<T>*>::const_iterator i = circular_link_.begin();
          i != circular_link_.end(); i++) {
       (*i)->Print(out);
       // Add a space if there are more elements remaining.
@@ -794,6 +828,65 @@ void QNodeChildrenIterator<T>::Next() {
 
 template <typename T>
 bool QNodeChildrenIterator<T>::IsDone() {
+  return current_ == NULL;
+}
+
+/***** QNodeChildrenConstIterator<T> class *****/
+
+template <typename T>
+QNodeChildrenConstIterator<T>::QNodeChildrenConstIterator(const PQNode<T>* parent,
+					     const PQNode<T>* begin_side) {
+  parent_ = parent;
+  Reset(begin_side);
+}
+
+template <typename T>
+void QNodeChildrenConstIterator<T>::Reset(const PQNode<T>* begin_side) {
+  current_ = parent_->endmost_children_[0];
+  if (begin_side)
+    current_ = begin_side;
+  prev_ = NULL;
+  next_ = current_->immediate_siblings_[0];
+}
+
+template <typename T>
+const PQNode<T>* QNodeChildrenConstIterator<T>::Current() {
+  return current_;
+}
+
+template <typename T>
+void QNodeChildrenConstIterator<T>::NextPseudoNodeSibling() {
+  // This should only be called from the first Next() call after Reset() and
+  // only if the first subnode has two immediate siblings.  We want to advance
+  // our iterator to the non-empty sibling of |current_|
+  prev_ = current_;
+  current_ = current_->ImmediateSiblingWithLabel(PQNode<T>::full);
+  if (!current_)
+    current_ = current_->ImmediateSiblingWithLabel(PQNode<T>::partial);
+}
+
+template <typename T>
+void QNodeChildrenConstIterator<T>::Next() {
+  // If the first child has 2 immediate siblings, then we are on
+  // the edge of a pseudonode.
+  if (IsDone())
+    return;
+  if (prev_ == NULL && current_->ImmediateSiblingCount() == 2) {
+    NextPseudoNodeSibling();
+  } else {
+    prev_ = current_;
+    current_ = next_;
+  }
+
+  if (current_) {
+    next_ = current_->immediate_siblings_[0];
+    if (next_ == prev_)
+      next_ = current_->immediate_siblings_[1];
+  }
+}
+
+template <typename T>
+bool QNodeChildrenConstIterator<T>::IsDone() {
   return current_ == NULL;
 }
 

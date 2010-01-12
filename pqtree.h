@@ -112,10 +112,10 @@ class PQTree {
   ~PQTree();
  
   // Returns the root PQNode<T> used for exploring the tree.
-  PQNode<T>* Root();
+  PQNode<T>* Root() const;
  
   // Mostly for debugging purposes, Prints the tree to standard out
-  string Print();
+  string Print() const;
   
   // Cleans up pointer mess caused by having a pseudonode
   void CleanPseudo();
@@ -131,7 +131,7 @@ class PQTree {
   bool ReduceAll(list<set<T> > L);
   
   // Returns 1 possible frontier, or ordering preserving the reductions
-  list<T> Frontier();
+  list<T> Frontier() const;
   
   // Assignment operator
   PQTree& operator=(const PQTree& to_copy);  
@@ -142,16 +142,16 @@ class PQTree {
   
   // Returns a frontier not including leaves that were not a part of any
   // reduction
-  list<T> ReducedFrontier();
+  list<T> ReducedFrontier() const;
   
   // Returns the reductions that have been performed on this tree.
-  list<set<T> > GetReductions();
+  list<set<T> > GetReductions() const;
   
   // Returns the set of all elements on which a reduction was performed.
-  set<T> GetContained();
+  set<T> GetContained() const;
   
   // Returns the number of valid ways in which the elements can be rearranged.
-  int PermutationCount();
+  int PermutationCount() const;
 };
 
 template <typename T>
@@ -843,12 +843,12 @@ PQTree<T>::PQTree(set<T> reduction_set) {
 }
 
 template <typename T>
-PQNode<T>* PQTree<T>::Root() {
+PQNode<T>* PQTree<T>::Root() const {
   return root_;
 }
 
 template <typename T>
-string PQTree<T>::Print() {
+string PQTree<T>::Print() const {
   string out;
   root_->Print(&out);
   return out;
@@ -934,14 +934,14 @@ bool PQTree<T>::ReduceAll(list<set<T> > L) {
 }
 
 template <typename T>
-list<T> PQTree<T>::Frontier() {
+list<T> PQTree<T>::Frontier() const {
   list<T> out;
   root_->FindFrontier(out);
   return out;
 }
 
 template <typename T>
-list<T> PQTree<T>::ReducedFrontier() {
+list<T> PQTree<T>::ReducedFrontier() const {
   list<T> out, inter;
   root_->FindFrontier(inter);
   set<T> allContained;
@@ -957,12 +957,12 @@ list<T> PQTree<T>::ReducedFrontier() {
 }
 
 template <typename T>
-list<set<T> > PQTree<T>::GetReductions() {
+list<set<T> > PQTree<T>::GetReductions() const {
   return reductions_;
 }
 
 template <typename T>
-set<T> PQTree<T>::GetContained() {
+set<T> PQTree<T>::GetContained() const {
   set<T> out;
   for (typename list<set<T> >::iterator i = reductions_.begin();
       i!=reductions_.end(); i++) {
@@ -972,7 +972,7 @@ set<T> PQTree<T>::GetContained() {
 }
 
 template <typename T>
-int PQTree<T>::PermutationCount() {
+int PQTree<T>::PermutationCount() const {
   return root_->PermutationCount();
 }
 
